@@ -1,13 +1,37 @@
 import useGetLoans from "../hooks/useGetLoan";
+import useRepayment from "../hooks/useRepayment";
+import toast from "react-hot-toast";
 
 const allLoans = () => {
   const { loans, loading } = useGetLoans();
+  const { PayRepayment } = useRepayment();
+
+  const handleRepayment = async (loanId, scheduleId) => {
+    try {
+      const data = await PayRepayment(loanId, scheduleId);
+      toast.success("Payment Successfull");
+      // console.log(data);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+   const allPaid = (repaymentSchedule) =>
+     repaymentSchedule.every((schedule) => schedule.status === "PAID");
   return (
-    <div className="bg-opacity-30 sm:h-[450px] min-w-[550px]  md:h-[600px] backdrop-blur-lg rounded-lg shadow-md bg-gray-600 bg-clip-padding backdrop-filter mt-16">
+    <div className="bg-opacity-30 sm:h-[450px] min-w-[550px]  md:h-[650px] backdrop-blur-lg rounded-lg shadow-md bg-gray-600 bg-clip-padding backdrop-filter mt-10">
+      <h2 className="text-3xl font-semibold text-center text-gray-300 p-3">
+        All Loans
+      </h2>
       {loading ? (
-        <p className="text-center mt-4">Loading...</p>
+        <div className="text-center mt-4">
+          <span className="loading loading-spinner "></span>
+        </div>
+      ) : loans.length === 0 ? (
+        <div className="text-center mt-4">
+          <p className="text-xl pt-20 text-white">No loans found.</p>
+        </div>
       ) : (
-        <div className="overflow-auto max-h-[600px]">
+        <div className="overflow-auto max-h-[580px]">
           <ul>
             {loans.map((loan) => (
               <li key={loan._id} className="">
@@ -43,16 +67,20 @@ const allLoans = () => {
                         loan.repaymentFrequency.slice(1).toLowerCase()}
                     </span>
                   </p>
-                  <p className="text-xl font-semibold ms-5 pt-4">
+                  <div className="text-xl font-semibold ms-5 pt-4">
                     Repayment Schedule:
-                    <button
-                      className="btn btn-warning  ms-4 "
-                      onClick={() =>
-                        document.getElementById("my_modal_1").showModal()
-                      }
-                    >
-                      Pay
-                    </button>
+                    {allPaid(loan.repaymentSchedule) ? (
+                      <span className="text-green-400 p-2">Loan Close</span>
+                    ) : (
+                      <button
+                        className="btn btn-warning ms-4"
+                        onClick={() =>
+                          document.getElementById("my_modal_1").showModal()
+                        }
+                      >
+                        Pay
+                      </button>
+                    )}
                     <dialog id="my_modal_1" className="modal">
                       <div className=" modal-box">
                         <div className="modal-action block">
@@ -97,6 +125,12 @@ const allLoans = () => {
                                               ? "bg-yellow-400 border-yellow-400"
                                               : "bg-green-400 border-green-400 "
                                           }`}
+                                          onClick={() => {
+                                            handleRepayment(
+                                              loan._id,
+                                              schedule._id
+                                            );
+                                          }}
                                         >
                                           {schedule.status === "PENDING"
                                             ? "PAY"
@@ -113,7 +147,7 @@ const allLoans = () => {
                         </div>
                       </div>
                     </dialog>
-                  </p>
+                  </div>
                   <p className="text-xl font-semibold ms-5 pt-4">
                     Loan Status:{" "}
                     <span
@@ -131,11 +165,6 @@ const allLoans = () => {
                         loan.status.slice(1).toLowerCase()}
                     </span>
                   </p>
-                  {/* <div className="flex justify-center rounded-lg">
-                    <button className="ms-5 mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                      Update Loan
-                    </button>
-                  </div> */}
                 </div>
               </li>
             ))}

@@ -2,7 +2,7 @@ import express from "express";
 import {
   createLoan,
   getUserLoan,
-  updateLoan,
+  payRepayment,
   deleteLoan,
   approveLoan,
   rejectLoan,
@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/', createLoan);
 router.get("/user/:loanId", getUserLoan);
-router.put('/:loanId', updateLoan);
+router.put("/:loanId", payRepayment);
 router.delete('/:loanId', deleteLoan);
 
 router.post(

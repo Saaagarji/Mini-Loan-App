@@ -97,6 +97,38 @@ export const deleteLoan = async (req, res) => {
   }
 };
 
+export const payRepayment = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { scheduleId } = req.body; // Assuming you pass the scheduleId in the request body
+
+    const loan = await Loan.findById(loanId);
+
+    if (!loan) {
+      return res.status(404).json({ error: "Loan not found" });
+    }
+
+    const scheduleIndex = loan.repaymentSchedule.findIndex(
+      (schedule) => schedule._id.toString() === scheduleId
+    );
+
+    if (scheduleIndex === -1) {
+      return res.status(404).json({ error: "Repayment schedule not found" });
+    }
+
+    loan.repaymentSchedule[scheduleIndex].status = "PAID";
+    await loan.save();
+
+    res.status(200).json({
+      message: "Repayment Successfully",
+      status: loan.repaymentSchedule[scheduleIndex].status,
+    });
+  } catch (error) {
+    console.error("Error in Repayment:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const approveLoan = async (req, res) => {
   try {
     const { loanId } = req.params;
@@ -142,46 +174,6 @@ export const rejectLoan = async (req, res) => {
   }
 };
 
-// export const addRepayment = async (req, res) => {
-//   try {
-//     const { loanId } = req.params;
-//     const { amount, date } = req.body;
-//     const loan = await Loan.findById(loanId);
-
-//     const nextRepayment = loan.repaymentSchedule.find(
-//       (repayment) => repayment.status === "PENDING"
-//     );
-//     const extraAmount = amount - nextRepayment;
-//     const newRepaymentAmount = nextRepayment.amount - extraAmount;
-//     nextRepayment.amount = newRepaymentAmount;
-
-//     if (!loan) {
-//       return res.status(404).json({ error: "Loan not found" });
-//     }
-
-//     if (newRepaymentAmount <= 0) {
-//       nextRepayment.amount = 0;
-//       nextRepayment.status = "PAID";
-//     }
-//     const newRepayment = new Loan({
-//       loan: loanId,
-//       amount,
-//       date,
-//       status: "PAID",
-//     });
-//     loan.repaymentSchedule.push(newRepayment);
-
-//     await loan.save();
-
-//     res.status(201).json({
-//       message: "Repayment added successfully",
-//       repayment: newRepayment,
-//     });
-//   } catch (error) {
-//     console.error("Error adding repayment:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
 export const addRepayment = async (req, res) => {
   try {
     const { loanId } = req.params;
