@@ -7,7 +7,7 @@ const SignUp = () => {
     fullName: "",
     email: "",
     password: "",
-    confirmPassword:"",
+    confirmPassword: "",
   });
   const { loading, signup } = useSignUp();
 

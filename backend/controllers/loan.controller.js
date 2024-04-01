@@ -42,21 +42,6 @@ export const getAllLoans = async (req, res) => {
   }
 };
 
-export const getLoanById = async (req, res) => {
-  try {
-    const { loanId } = req.params;
-    const loan = await Loan.findById(loanId).populate("user", "email");
-
-    if (!loan) {
-      return res.status(404).json({ error: "Loan not found" });
-    }
-    res.status(200).json(loan);
-  } catch (error) {
-    console.error("Error fetching loan:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
 export const getUserLoan = async (req, res) => {
   try {
     const { userId } = req.params;
